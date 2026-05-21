@@ -2981,9 +2981,10 @@ function buildVCard() {
   return [
     'BEGIN:VCARD', 'VERSION:3.0',
     'FN:'    + document.getElementById('fn').value,
-    'TITLE:' + document.getElementById('fc').value,
-    'TEL:'   + document.getElementById('ft').value,
+    'N:'     + document.getElementById('fn').value + ';;;;',
+    'TEL;TYPE=CELL:' + document.getElementById('ft').value,
     'EMAIL:' + document.getElementById('fe').value,
+    'URL:https://www.universal-assistance.com',
     'ORG:Universal Assistance',
     'END:VCARD'
   ].join('\n');
