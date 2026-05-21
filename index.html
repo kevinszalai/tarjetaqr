@@ -3083,7 +3083,7 @@ function dlCard() {
   var logoImg = new Image();
   logoImg.onload = function() {
     // Logo: max width 560px, max height 160px, centered
-    var maxW = 560, maxH = 160;
+    var maxW = 720, maxH = 210;
     var ratio = Math.min(maxW / logoImg.width, maxH / logoImg.height);
     var lw = logoImg.width  * ratio;
     var lh = logoImg.height * ratio;
@@ -3095,7 +3095,7 @@ function dlCard() {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, HDR_H, CARD_W, CARD_H - HDR_H);
 
-    var y = HDR_H + 80;
+    var y = HDR_H + 110;
 
     // Name
     ctx.fillStyle = '#1a56a0';
@@ -3107,7 +3107,7 @@ function dlCard() {
     ctx.fillStyle = '#888888';
     ctx.font = '400 40px ' + FONT;
     ctx.fillText(role, PAD, y);
-    y += 80;
+    y += 110;
 
     // Divider
     ctx.fillStyle = '#e8e8e8';
@@ -3198,7 +3198,9 @@ function dlCard() {
     // QR hint text
     ctx.fillStyle = '#aaaaaa';
     ctx.font = '400 34px ' + FONT;
-    ctx.fillText('Escanee el codigo QR para guardar el contacto', PAD, y);
+    ctx.textAlign = 'center';
+    ctx.fillText('Escanee el codigo QR para guardar el contacto', CARD_W / 2, y);
+    ctx.textAlign = 'left';
     y += 60;
 
     // QR code — render to offscreen canvas then draw
