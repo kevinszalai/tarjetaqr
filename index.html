@@ -101,7 +101,7 @@
       <span class="field-error" id="err-fe">Ingresá un email válido</span>
     </div>
     <div class="actions">
-      <button class="btn-download" id="btn-dl" onclick="dlCard()">&#x2B07; Descargar PNG 1080&#xd7;1920</button>
+      <button class="btn-download" id="btn-dl" onclick="dlCard()">&#x2B07; Descargar tarjeta</button>
     </div>
   </div>
 
@@ -3070,8 +3070,8 @@ function dlCard() {
     link.download = 'tarjeta_' + (document.getElementById('fn').value||'contacto').replace(/\s+/g,'_') + '.png';
     link.href = out.toDataURL('image/png');
     link.click();
-    btn.textContent = '\u2713 Descargada';
-    setTimeout(function(){ btn.textContent = '\u2B07 Descargar PNG 1080\u00d71920'; btn.disabled = false; }, 2200);
+    btn.textContent = '✓ Descargada';
+    setTimeout(function(){ btn.textContent = '⬇ Descargar tarjeta'; btn.disabled = false; }, 2200);
   }).catch(function(){ btn.textContent = 'Error - Reintentar'; btn.disabled = false; });
 }
 
