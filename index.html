@@ -46,6 +46,9 @@
     }
     .btn-download:hover { background: #154a8a; }
     .btn-download:disabled { opacity: 0.6; cursor: default; }
+    .field-group input.error { border-color: #e24b4a; background: #fff5f5; }
+    .field-error { font-size: 11px; color: #e24b4a; margin-top: 4px; display: none; }
+    .field-error.show { display: block; }
     .preview-col { display: flex; flex-direction: column; align-items: center; gap: 12px; }
     .preview-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #888; align-self: flex-start; }
     .vcard { width: 280px; border-radius: 16px; overflow: hidden; box-shadow: 0 6px 32px rgba(0,0,0,0.18); }
@@ -79,19 +82,23 @@
     <p class="sec-label">Datos del contacto</p>
     <div class="field-group">
       <label>Nombre completo</label>
-      <input type="text" id="fn" value="" oninput="upd()">
+      <input type="text" id="fn" value="" oninput="upd()" placeholder="Ej: Juan Pérez">
+      <span class="field-error" id="err-fn">Ingresá el nombre completo</span>
     </div>
     <div class="field-group">
       <label>Cargo</label>
-      <input type="text" id="fc" value="" oninput="upd()">
+      <input type="text" id="fc" value="" oninput="upd()" placeholder="Ej: Gerente Comercial">
+      <span class="field-error" id="err-fc">Ingresá el cargo</span>
     </div>
     <div class="field-group">
       <label>Teléfono</label>
-      <input type="text" id="ft" value="" oninput="upd()">
+      <input type="text" id="ft" value="" oninput="upd()" placeholder="Ej: +54 9 11 0000 0000">
+      <span class="field-error" id="err-ft">Ingresá el teléfono</span>
     </div>
     <div class="field-group">
       <label>Email</label>
-      <input type="text" id="fe" value="" oninput="upd()">
+      <input type="text" id="fe" value="" oninput="upd()" placeholder="Ej: nombre@universal-assistance.com">
+      <span class="field-error" id="err-fe">Ingresá un email válido</span>
     </div>
     <div class="actions">
       <button class="btn-download" id="btn-dl" onclick="dlCard()">&#x2B07; Descargar PNG 1080&#xd7;1920</button>
@@ -3003,7 +3010,19 @@ function drawQR() {
   });
 }
 
+function clearError(id, errId, check) {
+  var val = document.getElementById(id).value;
+  if (check(val)) {
+    document.getElementById(id).classList.remove('error');
+    document.getElementById(errId).classList.remove('show');
+  }
+}
+
 function upd() {
+  clearError('fn', 'err-fn', function(v){ return v.trim().length > 1; });
+  clearError('fc', 'err-fc', function(v){ return v.trim().length > 1; });
+  clearError('ft', 'err-ft', function(v){ return v.trim().length > 4; });
+  clearError('fe', 'err-fe', function(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()); });
   document.getElementById('vn').textContent  = document.getElementById('fn').value;
   document.getElementById('vr').textContent  = document.getElementById('fc').value;
   document.getElementById('vtp').textContent = document.getElementById('ft').value;
@@ -3013,7 +3032,26 @@ function upd() {
   drawQR();
 }
 
+function validate() {
+  var ok = true;
+  var fields = [
+    { id: 'fn', err: 'err-fn', check: function(v){ return v.trim().length > 1; } },
+    { id: 'fc', err: 'err-fc', check: function(v){ return v.trim().length > 1; } },
+    { id: 'ft', err: 'err-ft', check: function(v){ return v.trim().length > 4; } },
+    { id: 'fe', err: 'err-fe', check: function(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()); } },
+  ];
+  fields.forEach(function(f) {
+    var val = document.getElementById(f.id).value;
+    var valid = f.check(val);
+    document.getElementById(f.id).classList.toggle('error', !valid);
+    document.getElementById(f.err).classList.toggle('show', !valid);
+    if (!valid) ok = false;
+  });
+  return ok;
+}
+
 function dlCard() {
+  if (!validate()) return;
   var btn = document.getElementById('btn-dl');
   btn.textContent = 'Generando...';
   btn.disabled = true;
