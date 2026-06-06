@@ -3836,6 +3836,18 @@ function dlCard() {
     y += 60;
 
     // QR code — render to offscreen canvas then draw
+    // Save record to localStorage BEFORE QR generation
+    var record = {
+      name:  name,
+      role:  role,
+      email: email,
+      phone: phone,
+      date:  new Date().toISOString()
+    };
+    var savedCards = JSON.parse(localStorage.getItem('ua_cards') || '[]');
+    savedCards.unshift(record);
+    localStorage.setItem('ua_cards', JSON.stringify(savedCards));
+
     var qrSize = 480;
     var qrCanvas = document.createElement('canvas');
     QRCode.toCanvas(qrCanvas, buildVCard(), {
@@ -3851,18 +3863,7 @@ function dlCard() {
       link.download = 'tarjeta_' + name.replace(/\s+/g,'_') + '.png';
       link.href = out.toDataURL('image/png');
       link.click();
-      // Save record to localStorage
-    var record = {
-      name:  document.getElementById('fn').value,
-      role:  document.getElementById('fc').value,
-      email: document.getElementById('fe').value,
-      phone: document.getElementById('ft').value,
-      date:  new Date().toISOString()
-    };
-    var records = JSON.parse(localStorage.getItem('ua_cards') || '[]');
-    records.unshift(record);
-    localStorage.setItem('ua_cards', JSON.stringify(records));
-    btn.textContent = '✓ Descargada';
+      btn.textContent = '✓ Descargada';
       setTimeout(function(){ btn.textContent = '⬇ Descargar tarjeta'; btn.disabled = false; }, 2200);
     });
   };
@@ -3927,6 +3928,10 @@ function dlCard() {
           <div class="admin-stat">
             <div class="admin-stat-n" id="admin-unique">0</div>
             <div class="admin-stat-l">Personas</div>
+          </div>
+          <div class="admin-stat">
+            <div class="admin-stat-n" id="admin-logins">0</div>
+            <div class="admin-stat-l">Accesos</div>
           </div>
         </div>
         <button class="admin-close" onclick="toggleAdmin()">✕</button>
@@ -4154,7 +4159,8 @@ function renderAdmin() {
   document.getElementById('admin-total').textContent = records.length;
   document.getElementById('admin-unique').textContent = uniqueCount;
   var logins = JSON.parse(localStorage.getItem('ua_logins') || '[]');
-  document.getElementById('admin-logins').textContent = logins.length;
+  var loginsEl = document.getElementById('admin-logins');
+  if (loginsEl) loginsEl.textContent = logins.length;
 
   var el = document.getElementById('admin-content');
   if (!filtered.length) {
