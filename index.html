@@ -4067,10 +4067,141 @@ function dlCard() {
 </div>
 
 <script>
-
-
-/* ── LOGIN ── */
+/* ── LOGIN & OTP ── */
 emailjs.init('JvT7hJ4V5hNYCr7GA');
+
+var _otpCode = '';
+var _otpEmail = '';
+var _otpExpiry = 0;
+
+function doLogin() {
+  var email = (document.getElementById('login-email').value || '').trim().toLowerCase();
+  var errEl  = document.getElementById('login-error');
+  var inputEl = document.getElementById('login-email');
+  errEl.textContent = '';
+  inputEl.classList.remove('error');
+
+  if (!email) {
+    errEl.textContent = 'Ingresá tu email corporativo.';
+    inputEl.classList.add('error');
+    return;
+  }
+  if (!/^[a-zA-Z]{2,}\.[a-zA-Z]{2,}@universal-assistance\.com$/i.test(email)) {
+    errEl.textContent = 'Usá el formato nombre.apellido@universal-assistance.com';
+    inputEl.classList.add('error');
+    return;
+  }
+  var bl = ['nombre','apellido','test','prueba','admin','usuario','user','mail','email','demo','universal','assistance','info','contacto','soporte','support','hola','hello','noreply','no','reply','assist','card'];
+  var pts = email.split('@')[0].split('.');
+  if (bl.indexOf(pts[0]) !== -1 || bl.indexOf(pts[1]) !== -1) {
+    errEl.textContent = 'Ingresá tu nombre y apellido reales.';
+    inputEl.classList.add('error');
+    return;
+  }
+
+  // Send OTP
+  _otpEmail = email;
+  _otpCode  = String(Math.floor(100000 + Math.random() * 900000));
+  _otpExpiry = Date.now() + 10 * 60 * 1000;
+
+  var firstName = pts[0].charAt(0).toUpperCase() + pts[0].slice(1);
+
+  document.getElementById('otp-email-display').textContent = email;
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('otp-screen').classList.add('open');
+  document.getElementById('otp-sending').style.cssText = 'display:block;color:var(--ua-blue)';
+  document.getElementById('otp-sending').textContent = 'Enviando código...';
+  document.getElementById('otp-verify-btn').disabled = true;
+
+  emailjs.send('service_m75x5jh', 'template_admsnzn', {
+    to_name:  firstName,
+    to_email: email,
+    passcode: _otpCode,
+    time:     new Date(_otpExpiry).toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
+  }).then(function() {
+    document.getElementById('otp-sending').style.display = 'none';
+    document.getElementById('otp-verify-btn').disabled = false;
+    document.getElementById('otp-0').focus();
+  }).catch(function(err) {
+    console.error('EmailJS:', err);
+    document.getElementById('otp-sending').textContent = 'Error al enviar. Intentá de nuevo.';
+    document.getElementById('otp-sending').style.color = 'var(--error)';
+    document.getElementById('otp-verify-btn').disabled = false;
+  });
+}
+
+function otpInput(idx) {
+  var el = document.getElementById('otp-' + idx);
+  el.value = el.value.replace(/[^0-9]/g, '');
+  el.classList.remove('error');
+  document.getElementById('otp-error').textContent = '';
+  if (el.value && idx < 5) document.getElementById('otp-' + (idx+1)).focus();
+  var full = '';
+  for (var i = 0; i < 6; i++) full += document.getElementById('otp-' + i).value;
+  if (full.length === 6) verifyOTP();
+}
+
+function otpKey(e, idx) {
+  if (e.key === 'Backspace' && !document.getElementById('otp-' + idx).value && idx > 0)
+    document.getElementById('otp-' + (idx-1)).focus();
+}
+
+function verifyOTP() {
+  var entered = '';
+  for (var i = 0; i < 6; i++) entered += document.getElementById('otp-' + i).value;
+  var errEl = document.getElementById('otp-error');
+  if (entered.length < 6) { errEl.textContent = 'Ingresá los 6 dígitos.'; return; }
+  if (Date.now() > _otpExpiry) {
+    errEl.textContent = 'El código expiró. Pedí uno nuevo.';
+    for (var i = 0; i < 6; i++) { document.getElementById('otp-' + i).value = ''; document.getElementById('otp-' + i).classList.add('error'); }
+    return;
+  }
+  if (entered !== _otpCode) {
+    errEl.textContent = 'Código incorrecto. Intentá de nuevo.';
+    for (var i = 0; i < 6; i++) { document.getElementById('otp-' + i).value = ''; document.getElementById('otp-' + i).classList.add('error'); }
+    document.getElementById('otp-0').focus();
+    return;
+  }
+  // Correcto
+  document.getElementById('otp-screen').classList.remove('open');
+  localStorage.setItem('ua_user', _otpEmail);
+  var logins = JSON.parse(localStorage.getItem('ua_logins') || '[]');
+  logins.unshift({ email: _otpEmail, date: new Date().toISOString() });
+  localStorage.setItem('ua_logins', JSON.stringify(logins));
+  showUserBadge(_otpEmail);
+}
+
+function resendOTP() {
+  _otpCode   = String(Math.floor(100000 + Math.random() * 900000));
+  _otpExpiry = Date.now() + 10 * 60 * 1000;
+  for (var i = 0; i < 6; i++) { document.getElementById('otp-' + i).value = ''; document.getElementById('otp-' + i).classList.remove('error'); }
+  document.getElementById('otp-error').textContent = '';
+  document.getElementById('otp-sending').style.cssText = 'display:block;color:var(--ua-blue)';
+  document.getElementById('otp-sending').textContent = 'Enviando código...';
+  document.getElementById('otp-verify-btn').disabled = true;
+  var firstName = _otpEmail.split('@')[0].split('.')[0];
+  firstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+  emailjs.send('service_m75x5jh', 'template_admsnzn', {
+    to_name: firstName, to_email: _otpEmail, passcode: _otpCode,
+    time: new Date(_otpExpiry).toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'})
+  }).then(function() {
+    document.getElementById('otp-sending').textContent = '✓ Código reenviado.';
+    document.getElementById('otp-verify-btn').disabled = false;
+    document.getElementById('otp-0').focus();
+  }).catch(function() {
+    document.getElementById('otp-sending').textContent = 'Error al reenviar.';
+    document.getElementById('otp-sending').style.color = 'var(--error)';
+    document.getElementById('otp-verify-btn').disabled = false;
+  });
+}
+
+function backToLogin() {
+  document.getElementById('otp-screen').classList.remove('open');
+  document.getElementById('login-screen').classList.remove('hidden');
+  for (var i = 0; i < 6; i++) { document.getElementById('otp-' + i).value = ''; document.getElementById('otp-' + i).classList.remove('error'); }
+  document.getElementById('otp-error').textContent = '';
+  document.getElementById('otp-sending').style.display = 'none';
+}
 
 function showUserBadge(email) {
   var name = email.split('@')[0].replace(/[\.\-]/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
