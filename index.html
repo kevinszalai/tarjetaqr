@@ -4068,6 +4068,8 @@ function dlCard() {
 
 /* ── LOGIN ── */
 emailjs.init('JvT7hJ4V5hNYCr7GA');
+// Clear stored session — OTP required on every visit
+localStorage.removeItem('ua_user');
 
 var otpCode = '';
 var otpEmail = '';
@@ -4235,19 +4237,15 @@ function doLogout() {
 
 // Check session on load
 window.addEventListener('DOMContentLoaded', function() {
-  var user = localStorage.getItem('ua_user');
-  if (user) {
-    document.getElementById('login-screen').classList.add('hidden');
-    showUserBadge(user);
-    // Register each visit
-    var logins = JSON.parse(localStorage.getItem('ua_logins') || '[]');
-    logins.unshift({ email: user, date: new Date().toISOString() });
-    localStorage.setItem('ua_logins', JSON.stringify(logins));
-  } else {
-    setTimeout(function(){
-      document.getElementById('login-email').focus();
-    }, 200);
+  // Always show login — OTP required every session
+  var savedEmail = localStorage.getItem('ua_user');
+  if (savedEmail) {
+    // Pre-fill email for convenience but still require OTP
+    document.getElementById('login-email').value = savedEmail;
   }
+  setTimeout(function(){
+    document.getElementById('login-email').focus();
+  }, 200);
 });
 
 
