@@ -549,6 +549,19 @@
       outline: none;
     }
     .admin-search:focus { border-color: var(--ua-blue); }
+    .admin-export-btn {
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'Poppins', sans-serif;
+      border-radius: 8px;
+      border: 1.5px solid var(--ua-blue);
+      background: #fff;
+      color: var(--ua-blue);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .admin-export-btn:hover { background: var(--ua-light); }
     .admin-clear-btn {
       padding: 8px 16px;
       font-size: 12px;
@@ -562,7 +575,8 @@
       white-space: nowrap;
     }
     .admin-clear-btn:hover { background: #fff5f5; }
-    .admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .admin-table-wrap { overflow-x: auto; width: 100%; }
+    .admin-table { width: 100%; min-width: 620px; border-collapse: collapse; font-size: 12px; }
     .admin-table th {
       text-align: left;
       font-size: 10px;
@@ -3945,6 +3959,7 @@ function dlCard() {
       </div>
       <div class="admin-toolbar">
         <input type="text" class="admin-search" id="admin-search" placeholder="Buscar..." oninput="renderAdmin()">
+        <button class="admin-export-btn" onclick="exportToExcel()">📥 Exportar Excel</button>
         <button class="admin-clear-btn" onclick="clearAdminData()">🗑 Borrar</button>
       </div>
       <div id="admin-content"></div>
@@ -4040,6 +4055,62 @@ window.addEventListener('DOMContentLoaded', function() {
   }
 });
 
+
+function exportToExcel() {
+  var isCards = currentTab === 'cards';
+  var data = isCards
+    ? JSON.parse(localStorage.getItem('ua_cards') || '[]')
+    : JSON.parse(localStorage.getItem('ua_logins') || '[]');
+
+  if (!data.length) {
+    alert('No hay datos para exportar.');
+    return;
+  }
+
+  var rows, headers;
+  if (isCards) {
+    headers = ['Nombre', 'Cargo', 'Email tarjeta', 'Teléfono', 'Creado por', 'Fecha'];
+    rows = data.map(function(r) {
+      return [
+        r.name || '',
+        r.role || '',
+        r.email || '',
+        r.phone || '',
+        r.createdBy || '',
+        formatDate(r.date)
+      ];
+    });
+  } else {
+    headers = ['Usuario', 'Email', 'Fecha acceso'];
+    rows = data.map(function(r) {
+      var name = (r.email||'').split('@')[0].replace(/[\.\-]/g, ' ')
+        .replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+      return [name, r.email || '', formatDate(r.date)];
+    });
+  }
+
+  // Build CSV with BOM for Excel UTF-8
+  var BOM = '\uFEFF';
+  var csv = BOM + headers.join(';') + '\n';
+  rows.forEach(function(row) {
+    csv += row.map(function(cell) {
+      var val = String(cell).replace(/"/g, '""');
+      return '"' + val + '"';
+    }).join(';') + '\n';
+  });
+
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var link = document.createElement('a');
+  var filename = isCards
+    ? 'tarjetas_' + new Date().toISOString().slice(0,10) + '.csv'
+    : 'accesos_'  + new Date().toISOString().slice(0,10) + '.csv';
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 /* ── ADMIN ── */
 function toggleAdmin() {
   var overlay = document.getElementById('admin-overlay');
@@ -4121,7 +4192,7 @@ function renderLogins() {
     '</tr>';
   }).join('');
 
-  el.innerHTML = '<table class="admin-table"><thead><tr><th>Usuario</th><th>Email</th><th>Fecha acceso</th></tr></thead><tbody>' + rows + '</tbody></table>';
+  el.innerHTML = '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Usuario</th><th>Email</th><th>Fecha acceso</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
 
 function formatDate(iso) {
@@ -4183,9 +4254,9 @@ function renderAdmin() {
     '</tr>';
   }).join('');
 
-  el.innerHTML = '<table class="admin-table"><thead><tr>' +
+  el.innerHTML = '<div class="admin-table-wrap"><table class="admin-table"><thead><tr>' +
     '<th>Contacto</th><th>Email tarjeta</th><th>Tel&eacute;fono</th><th>Creado por</th><th>Fecha</th><th></th>' +
-    '</tr></thead><tbody>' + rows + '</tbody></table>';
+    '</tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
 
 function escHtml(s) {
