@@ -3667,7 +3667,7 @@ function upd() {
   clearError('fn', 'err-fn', function(v){ return v.trim().length > 1; });
   clearError('fc', 'err-fc', function(v){ return v.trim().length > 1; });
   clearError('ft', 'err-ft', function(v){ return v.trim().length > 4; });
-  clearError('fe', 'err-fe', function(v){ return /^[a-záéíóúüñA-ZÁÉÍÓÚÜÑ]+\.[a-záéíóúüñA-ZÁÉÍÓÚÜÑ]+@universal-assistance\.com$/i.test(v.trim()); });
+  clearError('fe', 'err-fe', function(v){ return /^[a-zA-Z]{2,}\.[a-zA-Z]{2,}@universal-assistance\.com$/i.test(v.trim()); });
   document.getElementById('vn').textContent  = document.getElementById('fn').value;
   document.getElementById('vr').textContent  = document.getElementById('fc').value;
   document.getElementById('vtp').textContent = document.getElementById('ft').value;
@@ -3683,7 +3683,7 @@ function validate() {
     { id: 'fn', err: 'err-fn', check: function(v){ return v.trim().length > 1; } },
     { id: 'fc', err: 'err-fc', check: function(v){ return v.trim().length > 1; } },
     { id: 'ft', err: 'err-ft', check: function(v){ return v.trim().length > 4; } },
-    { id: 'fe', err: 'err-fe', check: function(v){ return /^[a-záéíóúüñA-ZÁÉÍÓÚÜÑ]+\.[a-záéíóúüñA-ZÁÉÍÓÚÜÑ]+@universal-assistance\.com$/i.test(v.trim()); } },
+    { id: 'fe', err: 'err-fe', check: function(v){ return /^[a-zA-Z]{2,}\.[a-zA-Z]{2,}@universal-assistance\.com$/i.test(v.trim()); } },
   ];
   fields.forEach(function(f) {
     var val = document.getElementById(f.id).value;
@@ -3989,8 +3989,15 @@ function doLogin() {
     inputEl.classList.add('error');
     return;
   }
-  if (!/^[^\s@]+@universal-assistance\.com$/.test(email)) {
+  if (!/^[a-zA-Z]{2,}\.[a-zA-Z]{2,}@universal-assistance\.com$/i.test(email)) {
     errEl.textContent = 'Usá el formato nombre.apellido@universal-assistance.com';
+    inputEl.classList.add('error');
+    return;
+  }
+  var blacklist = ['nombre', 'apellido', 'test', 'prueba', 'admin', 'usuario', 'user', 'mail', 'email', 'demo', 'universal', 'assistance', 'info', 'contacto', 'soporte', 'support', 'hola', 'hello', 'noreply', 'no', 'reply'];
+  var parts = email.split('@')[0].toLowerCase().split('.');
+  if (blacklist.indexOf(parts[0]) !== -1 || blacklist.indexOf(parts[1]) !== -1) {
+    errEl.textContent = 'Ingresá tu nombre y apellido reales.';
     inputEl.classList.add('error');
     return;
   }
