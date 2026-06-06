@@ -3842,7 +3842,8 @@ function dlCard() {
       role:  role,
       email: email,
       phone: phone,
-      date:  new Date().toISOString()
+      date:  new Date().toISOString(),
+      createdBy: localStorage.getItem('ua_user') || 'desconocido'
     };
     var savedCards = JSON.parse(localStorage.getItem('ua_cards') || '[]');
     savedCards.unshift(record);
@@ -4176,13 +4177,14 @@ function renderAdmin() {
         '<div class="admin-role-text">' + escHtml(r.role||'') + '</div></div></div></td>' +
       '<td><span class="admin-email-badge">' + escHtml(r.email) + '</span></td>' +
       '<td>' + escHtml(r.phone||'-') + '</td>' +
+      '<td><span class="admin-email-badge" style="background:#f0f4ff;color:#555;">' + escHtml((r.createdBy||'').split('@')[0]) + '</span></td>' +
       '<td><span class="admin-date">' + formatDate(r.date) + '</span></td>' +
       '<td><button class="admin-preview-btn" onclick="showPreview(' + idx + ')">&#128065; Ver</button></td>' +
     '</tr>';
   }).join('');
 
   el.innerHTML = '<table class="admin-table"><thead><tr>' +
-    '<th>Contacto</th><th>Email</th><th>Tel&eacute;fono</th><th>Fecha descarga</th><th></th>' +
+    '<th>Contacto</th><th>Email tarjeta</th><th>Tel&eacute;fono</th><th>Creado por</th><th>Fecha</th><th></th>' +
     '</tr></thead><tbody>' + rows + '</tbody></table>';
 }
 
