@@ -736,7 +736,7 @@
     <div class="field-group">
       <label>Email <span class="req">*</span></label>
       <input type="text" id="fe" value="" oninput="upd()" placeholder="Ej: nombre@universal-assistance.com">
-      <span class="field-error" id="err-fe">El email debe ser @universal-assistance.com</span>
+      <span class="field-error" id="err-fe">El formato debe ser nombre.apellido@universal-assistance.com</span>
     </div>
 
     <button class="btn-download" id="btn-dl" onclick="dlCard()">⬇ Descargar tarjeta</button>
@@ -3667,7 +3667,7 @@ function upd() {
   clearError('fn', 'err-fn', function(v){ return v.trim().length > 1; });
   clearError('fc', 'err-fc', function(v){ return v.trim().length > 1; });
   clearError('ft', 'err-ft', function(v){ return v.trim().length > 4; });
-  clearError('fe', 'err-fe', function(v){ return /^[^\s@]+@universal-assistance\.com$/i.test(v.trim()); });
+  clearError('fe', 'err-fe', function(v){ return /^[a-záéíóúüñA-ZÁÉÍÓÚÜÑ]+\.[a-záéíóúüñA-ZÁÉÍÓÚÜÑ]+@universal-assistance\.com$/i.test(v.trim()); });
   document.getElementById('vn').textContent  = document.getElementById('fn').value;
   document.getElementById('vr').textContent  = document.getElementById('fc').value;
   document.getElementById('vtp').textContent = document.getElementById('ft').value;
@@ -3683,7 +3683,7 @@ function validate() {
     { id: 'fn', err: 'err-fn', check: function(v){ return v.trim().length > 1; } },
     { id: 'fc', err: 'err-fc', check: function(v){ return v.trim().length > 1; } },
     { id: 'ft', err: 'err-ft', check: function(v){ return v.trim().length > 4; } },
-    { id: 'fe', err: 'err-fe', check: function(v){ return /^[^\s@]+@universal-assistance\.com$/i.test(v.trim()); } },
+    { id: 'fe', err: 'err-fe', check: function(v){ return /^[a-záéíóúüñA-ZÁÉÍÓÚÜÑ]+\.[a-záéíóúüñA-ZÁÉÍÓÚÜÑ]+@universal-assistance\.com$/i.test(v.trim()); } },
   ];
   fields.forEach(function(f) {
     var val = document.getElementById(f.id).value;
@@ -3900,9 +3900,9 @@ function dlCard() {
   <div class="login-box" style="width:100%;margin:0;">
         <div class="login-title">Bienvenido</div>
     <div class="login-sub">Plataforma de generación de<br><strong>Tarjetas Virtuales con QR</strong></div>
-    <div style="font-size:12px;color:#aaa;margin-top:-18px;margin-bottom:22px;text-align:center;">Ingresá con tu email corporativo <strong style='color:var(--ua-blue)'>@universal-assistance.com</strong></div>
+    <div style="font-size:12px;color:#aaa;margin-top:-18px;margin-bottom:22px;text-align:center;">Ingresá con tu email corporativo<br><strong style='color:var(--ua-blue)'>nombre.apellido@universal-assistance.com</strong></div>
     <div class="login-field">
-      <input type="email" id="login-email" placeholder="tu.nombre@universal-assistance.com"
+      <input type="email" id="login-email" placeholder="nombre.apellido@universal-assistance.com"
         onkeydown="if(event.key==='Enter')doLogin()" autocomplete="email">
     </div>
     <div class="login-error" id="login-error"></div>
@@ -3990,7 +3990,7 @@ function doLogin() {
     return;
   }
   if (!/^[^\s@]+@universal-assistance\.com$/.test(email)) {
-    errEl.textContent = 'Solo podés ingresar con un email @universal-assistance.com';
+    errEl.textContent = 'Usá el formato nombre.apellido@universal-assistance.com';
     inputEl.classList.add('error');
     return;
   }
