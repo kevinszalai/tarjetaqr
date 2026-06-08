@@ -4075,7 +4075,8 @@ var _otpEmail = '';
 var _otpExpiry = 0;
 
 function doLogin() {
-  var email = (document.getElementById('login-email').value || '').trim().toLowerCase();
+  var raw = (document.getElementById('login-email').value || '').trim().toLowerCase();
+  var email = raw.indexOf('@') === -1 ? raw + '@universal-assistance.com' : raw;
   var errEl  = document.getElementById('login-error');
   var inputEl = document.getElementById('login-email');
   errEl.textContent = '';
